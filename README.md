@@ -17,6 +17,11 @@ A beautiful vintage-style animated love letter webpage with a handwritten font, 
 2. Open `index.html` in your browser  
 3. Watch the love letter type itself with charming heart animations!
 
+## Live Demo
+
+Check out the live demo here:  
+[https://snehachaursia.github.io/-/](https://snehachaursia.github.io/-/)
+
 ## Technologies Used
 
 - HTML5  
