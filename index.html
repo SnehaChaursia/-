@@ -1,39 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Centered Image</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vintage Typed Letter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
-      padding: 0;
+      background: #fff8f0;
+      font-family: 'Cedarville Cursive', cursive;
+      overflow-x: hidden;
       height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      background: #e2dabc; /* optional */
+      justify-content: center;
+      padding: 20px;
+      position: relative;
     }
 
-    img {
-      max-width: 90%;
-      height: auto;
+    .letter-container {
+      background: #fdf6e3;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1), inset 0 0 30px #fff5cc;
+      border-radius: 15px;
+      width: 600px;
+      height: 750px;
+      padding: 40px 50px;
+      color: #5b4636;
+      font-size: 24px;
+      line-height: 1.8;
+      border: 1.5px solid #e3d5b8;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      box-sizing: border-box;
+      display: none;
     }
-    img:hover {
-        transform: scale(1.1);
-      }
-      img{  
-       transition: transform 0.3s ease;
-      }
-    
+
+    #typed-text {
+      display: inline;
+      position: relative;
+    }
+
+    #cursor {
+      display: inline-block;
+      margin-left: 6px;
+      animation: blink 1s step-start infinite;
+      font-size: 20px;
+      user-select: none;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .floating-heart {
+      position: absolute;
+      color: #e94e77;
+      font-size: 16px;
+      user-select: none;
+      animation: floatUp 2s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-60px) scale(1.4); opacity: 0; }
+    }
+
+    .hearts {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    .heart {
+      position: absolute;
+      background: url('https://cdn-icons-png.flaticon.com/512/833/833472.png') no-repeat center center;
+      background-size: contain;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    b { color: #8a3b12; }
+
+    #start-btn {
+      font-size: 20px;
+      padding: 10px 25px;
+      margin-bottom: 20px;
+      background-color: #fddbb0;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background 0.3s;
+    }
+
+    #start-btn:hover {
+      background-color: #fccb8a;
+    }
   </style>
 </head>
 <body>
-<a href="letter.html">
 
+<button id="start-btn">💖 Play Music & Start Letter 💌</button>
 
-    <img src="Screenshot from 2025-06-27 00-37-04.png" alt="Centered Image">
-</a>
+<audio id="bg-music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<div class="hearts" id="hearts-container"></div>
+
+<div class="letter-container" id="letter-box" aria-label="Vintage love letter">
+  <span id="typed-text"></span><span id="cursor">❤️</span>
+</div>
+
+<script>
+  const letter = `My heart is with you.,
+
+<b>The closer you are to my heart, the more it hurts that we’re so far apart.</b>
+I can’t wait to see you.
+<b>I feel sukoon when I talk to you.</b>
+<b>Real happiness shows on my face when I’m with you.</b>
+<b>You understand me — and you help me understand myself.</b>
+You make me feel like me.
+<b>You make me laugh, even on my worst days.</b>
+<b>You’re not just someone who listens… you truly get me.</b>
+<b>Your eyes are deeper than the ocean.</b>
+And though I’m scared of deep water, I still want to fall into your eyes.
+<b>Even if I were given the whole world to choose from — I would still choose you.</b>
+<b>I love you to the moon and back 🌙.</b>
+
+Sneha ♥`;
+
+  const btn = document.getElementById('start-btn');
+  const audio = document.getElementById('bg-music');
+  const letterBox = document.getElementById('letter-box');
+  const typedTextElem = document.getElementById('typed-text');
+  const cursor = document.getElementById('cursor');
+
+  const container = letterBox;
+  const typingSpeed = 50;
+  let currentIndex = 0;
+
+  function createFloatingHeart(x, y) {
+    const heart = document.createElement('span');
+    heart.textContent = '♥';
+    heart.className = 'floating-heart';
+    heart.style.left = x + 'px';
+    heart.style.top = y + 'px';
+    document.body.appendChild(heart);
+    heart.addEventListener('animationend', () => heart.remove());
+  }
+
+  function typeLetter() {
+    if (currentIndex < letter.length) {
+      const char = letter[currentIndex];
+      if (char === '<') {
+        const end = letter.indexOf('>', currentIndex) + 1;
+        const tag = letter.slice(currentIndex, end);
+        typedTextElem.innerHTML += tag;
+        currentIndex = end;
+      } else {
+        typedTextElem.innerHTML += char;
+        currentIndex++;
+      }
+
+      if ([' ', ',', '.', '\n'].includes(char)) {
+        const range = document.createRange();
+        let lastNode = typedTextElem.childNodes[typedTextElem.childNodes.length - 1];
+        if (!lastNode) {
+          setTimeout(typeLetter, typingSpeed);
+          return;
+        }
+        range.setStart(lastNode, lastNode.length || 0);
+        range.setEnd(lastNode, lastNode.length || 0);
+        const rect = range.getBoundingClientRect();
+        createFloatingHeart(rect.right, rect.top);
+      }
+
+      container.scrollTop = container.scrollHeight;
+      setTimeout(typeLetter, typingSpeed);
+    } else {
+      cursor.style.display = 'none';
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    audio.play().catch(() => alert("Browser blocked autoplay. Please click again."));
+    btn.style.display = 'none';
+    letterBox.style.display = 'block';
+    typedTextElem.innerHTML = '';
+    cursor.style.display = 'inline-block';
+    typeLetter();
+  });
+
+  // Falling hearts background
+  const heartsContainer = document.getElementById('hearts-container');
+  const numberOfHearts = 30;
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  for (let i = 0; i < numberOfHearts; i++) {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    heart.style.left = randomBetween(0, 100) + 'vw';
+    heart.style.animationDuration = randomBetween(5, 15) + 's';
+    heart.style.animationDelay = randomBetween(0, 15) + 's';
+    heart.style.width = heart.style.height = randomBetween(15, 30) + 'px';
+    heartsContainer.appendChild(heart);
+  }
+</script>
 
 </body>
 </html>
